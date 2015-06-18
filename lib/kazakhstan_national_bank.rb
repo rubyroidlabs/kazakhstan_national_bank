@@ -10,7 +10,8 @@ class Money
       SERVICE_PATH = '/rss/rates_all.xml'
 
       def update_rates
-        daily_exchange_rates
+        update_parsed_rates(daily_exchange_rates)
+        @rates
       end
 
       private
@@ -20,11 +21,23 @@ class Money
       end
 
       def daily_exchange_rates
-        RSS::Parser.parse(uri.read, false).items.
-          each_with_object({'KZT_TO_KZT' => 1.0}) do |rate, rates|
-            rates["KZT_TO_#{rate.title}"] = 1 / rate.description.to_f
-            rates["#{rate.title}_TO_KZT"] = rate.description.to_f
+        RSS::Parser.parse(uri.read, false).items
+      end
+
+      def update_parsed_rates(rates)
+        add_rate('KZT', 'KZT', 1)
+        rates.each do |rate|
+          begin
+            if local_currencies.include?(rate.title)
+              add_rate('KZT', rate.title, 1 / rate.description.to_f)
+            end
+          rescue Money::Currency::UnknownCurrency
           end
+        end
+      end
+
+      def local_currencies
+        @local_currencies ||= Money::Currency.table.map { |currency| currency.last[:iso_code] }
       end
     end
   end
