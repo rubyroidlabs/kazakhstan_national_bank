@@ -30,6 +30,7 @@ class Money
           begin
             if local_currencies.include?(rate.title)
               add_rate('KZT', rate.title, 1 / rate.description.to_f)
+              add_rate(rate.title, 'KZT', rate.description.to_f)
             end
           rescue Money::Currency::UnknownCurrency
           end
