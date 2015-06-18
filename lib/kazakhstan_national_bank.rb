@@ -22,7 +22,8 @@ class Money
       def daily_exchange_rates
         RSS::Parser.parse(uri.read, false).items.
           each_with_object({'KZT_TO_KZT' => 1.0}) do |rate, rates|
-            rates["KZT_TO_#{rate.title}"] = rate.description.to_f
+            rates["KZT_TO_#{rate.title}"] = 1 / rate.description.to_f
+            rates["#{rate.title}_TO_KZT"] = rate.description.to_f
           end
       end
     end
